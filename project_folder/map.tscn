@@ -1,0 +1,1596 @@
+[gd_scene format=3 uid="uid://2i40l6ds35ry"]
+
+[ext_resource type="Script" uid="uid://ct2ajces2yke3" path="res://Scripts/CityGenerator.gd" id="1_c7s6e"]
+[ext_resource type="PackedScene" uid="uid://ckudr8chj1kgo" path="res://player.tscn" id="2_wijl4"]
+
+[sub_resource type="Environment" id="Environment_main"]
+background_mode = 2
+ambient_light_source = 2
+ambient_light_color = Color(0.18, 0.22, 0.32, 1)
+ambient_light_energy = 0.6
+tonemap_mode = 3
+tonemap_exposure = 1.25
+tonemap_white = 2.2
+ssr_enabled = true
+ssr_max_steps = 128
+ssr_fade_in = 0.2
+ssao_enabled = true
+ssao_radius = 1.8
+ssao_detail = 0.6
+ssil_enabled = true
+ssil_radius = 3.5
+ssil_intensity = 1.2
+sdfgi_enabled = true
+sdfgi_use_occlusion = true
+sdfgi_bounce_feedback = 0.8
+sdfgi_cascades = 6
+sdfgi_min_cell_size = 0.1
+sdfgi_normal_bias = 1.6
+sdfgi_probe_bias = 1.2
+glow_enabled = true
+glow_intensity = 0.35
+glow_mix = 0.08
+glow_bloom = 0.12
+volumetric_fog_enabled = true
+volumetric_fog_density = 0.025
+volumetric_fog_albedo = Color(0.6, 0.65, 0.7, 1)
+volumetric_fog_emission = Color(0.04, 0.06, 0.09, 1)
+volumetric_fog_emission_energy = 0.6
+volumetric_fog_gi_inject = 1.5
+volumetric_fog_anisotropy = 0.3
+volumetric_fog_length = 350.0
+volumetric_fog_detail_spread = 2.5
+volumetric_fog_ambient_inject = 0.3
+adjustment_enabled = true
+adjustment_brightness = 0.98
+adjustment_contrast = 1.1
+adjustment_saturation = 1.05
+
+[sub_resource type="Gradient" id="Grad_grass_rich"]
+offsets = PackedFloat32Array(0, 0.4, 0.7, 1)
+colors = PackedColorArray(0.06, 0.12, 0.03, 1, 0.12, 0.22, 0.06, 1, 0.1, 0.18, 0.05, 1, 0.15, 0.25, 0.08, 1)
+
+[sub_resource type="FastNoiseLite" id="FNL_grass_detail"]
+noise_type = 3
+seed = 111
+frequency = 0.06
+
+[sub_resource type="NoiseTexture2D" id="Tex_grass"]
+width = 2048
+height = 2048
+noise = SubResource("FNL_grass_detail")
+color_ramp = SubResource("Grad_grass_rich")
+seamless = true
+
+[sub_resource type="NoiseTexture2D" id="Tex_grass_n"]
+width = 2048
+height = 2048
+noise = SubResource("FNL_grass_detail")
+seamless = true
+as_normal_map = true
+bump_strength = 12.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_terrain_grass"]
+albedo_texture = SubResource("Tex_grass")
+roughness = 0.97
+normal_enabled = true
+normal_texture = SubResource("Tex_grass_n")
+uv1_scale = Vector3(0.025, 0.025, 0.025)
+uv1_triplanar = true
+
+[sub_resource type="StandardMaterial3D" id="Mat_sidewalk"]
+albedo_color = Color(0.55, 0.52, 0.48, 1)
+roughness = 0.85
+uv1_scale = Vector3(0.3, 0.3, 0.3)
+uv1_triplanar = true
+
+[sub_resource type="StandardMaterial3D" id="Mat_gravel"]
+albedo_color = Color(0.38, 0.35, 0.32, 1)
+roughness = 0.96
+uv1_scale = Vector3(0.2, 0.2, 0.2)
+uv1_triplanar = true
+
+[sub_resource type="Gradient" id="Grad_asphalt"]
+colors = PackedColorArray(0.07, 0.07, 0.08, 1, 0.16, 0.16, 0.17, 1)
+
+[sub_resource type="FastNoiseLite" id="FNL_asphalt"]
+noise_type = 3
+seed = 1337
+frequency = 1.5
+fractal_type = 2
+fractal_octaves = 4
+
+[sub_resource type="NoiseTexture2D" id="Tex_asphalt"]
+width = 1024
+height = 1024
+noise = SubResource("FNL_asphalt")
+color_ramp = SubResource("Grad_asphalt")
+seamless = true
+
+[sub_resource type="NoiseTexture2D" id="Tex_asphalt_normal"]
+width = 1024
+height = 1024
+noise = SubResource("FNL_asphalt")
+seamless = true
+as_normal_map = true
+bump_strength = 3.5
+
+[sub_resource type="StandardMaterial3D" id="Mat_asphalt"]
+albedo_texture = SubResource("Tex_asphalt")
+roughness = 0.92
+normal_enabled = true
+normal_scale = 0.8
+normal_texture = SubResource("Tex_asphalt_normal")
+uv1_scale = Vector3(0.15, 0.15, 0.15)
+uv1_triplanar = true
+
+[sub_resource type="StandardMaterial3D" id="Mat_water"]
+transparency = 1
+albedo_color = Color(0.05, 0.18, 0.35, 0.85)
+roughness = 0.04
+emission_enabled = true
+emission = Color(0.02, 0.08, 0.18, 1)
+emission_energy_multiplier = 0.4
+
+[sub_resource type="Gradient" id="Grad_dirt"]
+colors = PackedColorArray(0.28, 0.2, 0.12, 1, 0.42, 0.32, 0.2, 1)
+
+[sub_resource type="FastNoiseLite" id="FNL_dirt"]
+noise_type = 3
+seed = 777
+frequency = 0.09
+fractal_octaves = 4
+
+[sub_resource type="NoiseTexture2D" id="Tex_dirt"]
+width = 1024
+height = 1024
+noise = SubResource("FNL_dirt")
+color_ramp = SubResource("Grad_dirt")
+seamless = true
+
+[sub_resource type="StandardMaterial3D" id="Mat_dirt"]
+albedo_texture = SubResource("Tex_dirt")
+roughness = 0.98
+uv1_scale = Vector3(0.08, 0.08, 0.08)
+uv1_triplanar = true
+
+[sub_resource type="StandardMaterial3D" id="Mat_glass_office"]
+transparency = 1
+albedo_color = Color(0.3, 0.4, 0.5, 0.25)
+metallic = 0.05
+roughness = 0.05
+emission_enabled = true
+emission = Color(0.6, 0.7, 0.5, 1)
+emission_energy_multiplier = 0.3
+
+[sub_resource type="Gradient" id="Grad_concrete_dark"]
+colors = PackedColorArray(0.22, 0.22, 0.24, 1, 0.38, 0.38, 0.4, 1)
+
+[sub_resource type="FastNoiseLite" id="FNL_concrete_coarse"]
+noise_type = 3
+seed = 2001
+frequency = 0.04
+fractal_type = 2
+
+[sub_resource type="NoiseTexture2D" id="Tex_concrete_dark"]
+width = 1024
+height = 1024
+noise = SubResource("FNL_concrete_coarse")
+color_ramp = SubResource("Grad_concrete_dark")
+seamless = true
+
+[sub_resource type="NoiseTexture2D" id="Tex_concrete_dark_n"]
+width = 1024
+height = 1024
+noise = SubResource("FNL_concrete_coarse")
+seamless = true
+as_normal_map = true
+
+[sub_resource type="StandardMaterial3D" id="Mat_concrete_dark"]
+albedo_texture = SubResource("Tex_concrete_dark")
+roughness = 0.9
+normal_enabled = true
+normal_texture = SubResource("Tex_concrete_dark_n")
+uv1_scale = Vector3(0.08, 0.08, 0.08)
+uv1_triplanar = true
+
+[sub_resource type="StandardMaterial3D" id="Mat_metal_clean"]
+albedo_color = Color(0.55, 0.58, 0.62, 1)
+metallic = 0.92
+roughness = 0.35
+
+[sub_resource type="StandardMaterial3D" id="Mat_glass_neon"]
+transparency = 1
+albedo_color = Color(0.05, 0.08, 0.15, 0.4)
+metallic = 0.1
+roughness = 0.02
+emission_enabled = true
+emission = Color(0.1, 0.5, 1, 1)
+emission_energy_multiplier = 2.5
+
+[sub_resource type="Gradient" id="Grad_concrete_stained"]
+offsets = PackedFloat32Array(0, 0.3, 0.7, 1)
+colors = PackedColorArray(0.18, 0.16, 0.14, 1, 0.32, 0.3, 0.27, 1, 0.25, 0.22, 0.2, 1, 0.4, 0.37, 0.33, 1)
+
+[sub_resource type="FastNoiseLite" id="FNL_stain"]
+noise_type = 0
+seed = 555
+frequency = 0.03
+fractal_octaves = 3
+
+[sub_resource type="NoiseTexture2D" id="Tex_concrete_stained"]
+width = 1024
+height = 1024
+noise = SubResource("FNL_stain")
+color_ramp = SubResource("Grad_concrete_stained")
+seamless = true
+
+[sub_resource type="StandardMaterial3D" id="Mat_concrete_stained"]
+albedo_texture = SubResource("Tex_concrete_stained")
+roughness = 0.88
+uv1_scale = Vector3(0.06, 0.06, 0.06)
+uv1_triplanar = true
+
+[sub_resource type="Gradient" id="Grad_brick_red"]
+offsets = PackedFloat32Array(0, 0.04, 0.06, 0.95, 1)
+colors = PackedColorArray(0.28, 0.28, 0.28, 1, 0.12, 0.11, 0.1, 1, 0.55, 0.28, 0.18, 1, 0.65, 0.32, 0.22, 1, 0.45, 0.22, 0.15, 1)
+
+[sub_resource type="FastNoiseLite" id="FNL_brick"]
+noise_type = 5
+seed = 42
+frequency = 0.12
+fractal_type = 0
+cellular_distance_function = 2
+
+[sub_resource type="NoiseTexture2D" id="Tex_brick"]
+noise = SubResource("FNL_brick")
+color_ramp = SubResource("Grad_brick_red")
+seamless = true
+
+[sub_resource type="NoiseTexture2D" id="Tex_brick_n"]
+noise = SubResource("FNL_brick")
+seamless = true
+as_normal_map = true
+bump_strength = 9.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_brick"]
+albedo_texture = SubResource("Tex_brick")
+roughness = 0.86
+normal_enabled = true
+normal_texture = SubResource("Tex_brick_n")
+uv1_scale = Vector3(0.4, 1.2, 0.4)
+uv1_triplanar = true
+
+[sub_resource type="BoxMesh" id="BM_neon_sign_h"]
+size = Vector3(4, 0.3, 0.12)
+
+[sub_resource type="StandardMaterial3D" id="Mat_neon_red"]
+albedo_color = Color(1, 0.1, 0.1, 1)
+roughness = 0.2
+emission_enabled = true
+emission = Color(1, 0.05, 0.05, 1)
+emission_energy_multiplier = 8.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_neon_cyan"]
+albedo_color = Color(0.05, 1, 0.9, 1)
+roughness = 0.2
+emission_enabled = true
+emission = Color(0, 0.9, 0.85, 1)
+emission_energy_multiplier = 8.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_neon_green"]
+albedo_color = Color(0.1, 1, 0.2, 1)
+roughness = 0.2
+emission_enabled = true
+emission = Color(0.05, 0.95, 0.1, 1)
+emission_energy_multiplier = 6.5
+
+[sub_resource type="StandardMaterial3D" id="Mat_neon_amber"]
+albedo_color = Color(1, 0.6, 0.05, 1)
+roughness = 0.2
+emission_enabled = true
+emission = Color(1, 0.55, 0, 1)
+emission_energy_multiplier = 6.0
+
+[sub_resource type="BoxMesh" id="BM_neon_sign_v"]
+size = Vector3(0.3, 3.5, 0.12)
+
+[sub_resource type="StandardMaterial3D" id="Mat_neon_purple"]
+albedo_color = Color(0.8, 0.1, 1, 1)
+roughness = 0.2
+emission_enabled = true
+emission = Color(0.7, 0.05, 0.95, 1)
+emission_energy_multiplier = 7.0
+
+[sub_resource type="BoxMesh" id="BM_guard_rail"]
+size = Vector3(0.1, 0.9, 6)
+
+[sub_resource type="StandardMaterial3D" id="Mat_corrugated_metal"]
+albedo_color = Color(0.35, 0.3, 0.25, 1)
+metallic = 0.65
+roughness = 0.7
+
+[sub_resource type="StandardMaterial3D" id="Mat_metal_rusty"]
+albedo_color = Color(0.42, 0.28, 0.18, 1)
+metallic = 0.7
+roughness = 0.75
+
+[sub_resource type="CylinderMesh" id="CM_tank"]
+top_radius = 8.0
+bottom_radius = 8.0
+height = 16.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_oil_tank"]
+albedo_color = Color(0.3, 0.28, 0.25, 1)
+metallic = 0.78
+roughness = 0.55
+
+[sub_resource type="CylinderMesh" id="CM_chimney"]
+top_radius = 1.2
+bottom_radius = 2.0
+height = 40.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_chimney"]
+albedo_color = Color(0.25, 0.22, 0.2, 1)
+metallic = 0.35
+roughness = 0.85
+emission_enabled = true
+emission = Color(0.9, 0.35, 0, 1)
+emission_energy_multiplier = 0.5
+
+[sub_resource type="StandardMaterial3D" id="Mat_steel_beam"]
+albedo_color = Color(0.45, 0.45, 0.48, 1)
+metallic = 0.88
+roughness = 0.45
+
+[sub_resource type="BoxShape3D" id="BS_container"]
+size = Vector3(6, 2.5, 2.5)
+
+[sub_resource type="BoxMesh" id="BM_container"]
+size = Vector3(6, 2.5, 2.5)
+
+[sub_resource type="StandardMaterial3D" id="Mat_shipping_container_red"]
+albedo_color = Color(0.65, 0.15, 0.1, 1)
+metallic = 0.55
+roughness = 0.72
+
+[sub_resource type="StandardMaterial3D" id="Mat_shipping_container_blue"]
+albedo_color = Color(0.08, 0.18, 0.55, 1)
+metallic = 0.55
+roughness = 0.72
+
+[sub_resource type="StandardMaterial3D" id="Mat_shipping_container_green"]
+albedo_color = Color(0.1, 0.38, 0.15, 1)
+metallic = 0.55
+roughness = 0.72
+
+[sub_resource type="StandardMaterial3D" id="Mat_shipping_container_yellow"]
+albedo_color = Color(0.75, 0.6, 0.05, 1)
+metallic = 0.5
+roughness = 0.75
+
+[sub_resource type="StandardMaterial3D" id="Mat_wood_worn"]
+albedo_color = Color(0.38, 0.28, 0.18, 1)
+roughness = 0.92
+
+[sub_resource type="StandardMaterial3D" id="Mat_road_markings"]
+albedo_color = Color(0.95, 0.9, 0.6, 1)
+roughness = 0.7
+emission_enabled = true
+emission = Color(0.3, 0.28, 0.1, 1)
+emission_energy_multiplier = 0.4
+
+[sub_resource type="CylinderMesh" id="CM_lamppost"]
+top_radius = 0.08
+bottom_radius = 0.14
+height = 8.0
+
+[sub_resource type="SphereMesh" id="SM_lamp"]
+radius = 0.35
+height = 0.7
+
+[sub_resource type="StandardMaterial3D" id="Mat_plastic_dark"]
+albedo_color = Color(0.08, 0.08, 0.1, 1)
+metallic = 0.05
+roughness = 0.6
+
+[sub_resource type="BoxShape3D" id="BS_1x1x1"]
+
+[node name="CrimsonCity" type="Node3D" unique_id=1437157980]
+transform = Transform3D(-0.9966073, 0, 0.082303695, 0, 1, 0, -0.082303695, 0, -0.9966073, 0, 190.52835, 0)
+script = ExtResource("1_c7s6e")
+metadata/_edit_group_ = true
+
+[node name="GlobalEnvironment" type="WorldEnvironment" parent="." unique_id=533554637]
+environment = SubResource("Environment_main")
+
+[node name="SunLight" type="DirectionalLight3D" parent="." unique_id=1895266478]
+transform = Transform3D(0.766, -0.5, 0.404, 0, 0.628, 0.777, -0.642, -0.596, 0.481, 0, 180, 0)
+light_color = Color(1, 0.78, 0.55, 1)
+light_energy = 0.35
+shadow_enabled = true
+shadow_bias = 0.03
+shadow_normal_bias = 1.5
+shadow_blur = 2.5
+directional_shadow_split_2 = 0.3
+directional_shadow_split_3 = 0.6
+directional_shadow_fade_start = 0.9
+directional_shadow_max_distance = 400.0
+sky_mode = 1
+
+[node name="MoonLight" type="DirectionalLight3D" parent="." unique_id=253668402]
+transform = Transform3D(-0.766, 0.3, 0.566, 0, 0.882, -0.47, -0.642, -0.356, -0.676, 0, 200, 0)
+light_color = Color(0.55, 0.62, 0.9, 1)
+light_energy = 0.12
+
+[node name="Terrain" type="Node3D" parent="." unique_id=1192841759]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 175.31169, 0)
+
+[node name="Ground_Main" type="CSGBox3D" parent="Terrain" unique_id=337033064]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -212.8685, 0)
+use_collision = true
+size = Vector3(600, 2, 600)
+material = SubResource("Mat_terrain_grass")
+
+[node name="Ground_Docks_Concrete" type="CSGBox3D" parent="Terrain" unique_id=1470317119]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 109.50491, -201.2858, 120)
+use_collision = true
+size = Vector3(180, 1, 160)
+material = SubResource("Mat_sidewalk")
+
+[node name="Ground_Industrial_Gravel" type="CSGBox3D" parent="Terrain" unique_id=1592748208]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -160, -201.00363, 80)
+use_collision = true
+size = Vector3(200, 1, 200)
+material = SubResource("Mat_gravel")
+
+[node name="Ground_Airport_Tarmac" type="CSGBox3D" parent="Terrain" unique_id=51038079]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -80, -202.88257, -180)
+use_collision = true
+size = Vector3(200, 0.8, 180)
+material = SubResource("Mat_asphalt")
+
+[node name="Water_Harbor" type="CSGBox3D" parent="Terrain" unique_id=1754137331]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 250, -229.44089, 100)
+use_collision = true
+size = Vector3(120, 0.5, 200)
+material = SubResource("Mat_water")
+
+[node name="Water_River" type="CSGBox3D" parent="Terrain" unique_id=1020328264]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, -1.5, 0)
+use_collision = true
+size = Vector3(18, 0.5, 280)
+material = SubResource("Mat_water")
+
+[node name="Embankment_Left" type="CSGBox3D" parent="Terrain" unique_id=1948438440]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, -0.5, 0)
+use_collision = true
+size = Vector3(3, 2, 280)
+material = SubResource("Mat_dirt")
+
+[node name="Embankment_Right" type="CSGBox3D" parent="Terrain" unique_id=2080849866]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30, -0.5, 0)
+use_collision = true
+size = Vector3(3, 2, 280)
+material = SubResource("Mat_dirt")
+
+[node name="Downtown" type="Node3D" parent="." unique_id=110645110]
+
+[node name="Skyscraper_Alpha" type="CSGBox3D" parent="Downtown" unique_id=974050656]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30, 80, -60)
+use_collision = true
+size = Vector3(28, 160, 28)
+material = SubResource("Mat_glass_office")
+
+[node name="Skyscraper_Alpha_Base" type="CSGBox3D" parent="Downtown" unique_id=1426645970]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30, 15, -60)
+use_collision = true
+size = Vector3(34, 30, 34)
+material = SubResource("Mat_concrete_dark")
+
+[node name="Skyscraper_Alpha_Spire" type="CSGCylinder3D" parent="Downtown" unique_id=455093629]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30, 175, -60)
+use_collision = true
+radius = 1.5
+height = 30.0
+material = SubResource("Mat_metal_clean")
+
+[node name="Skyscraper_Beta" type="CSGBox3D" parent="Downtown" unique_id=1332517813]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 60, -70)
+use_collision = true
+size = Vector3(24, 120, 22)
+material = SubResource("Mat_concrete_dark")
+
+[node name="Skyscraper_Beta_Glass" type="CSGBox3D" parent="Downtown" unique_id=395888017]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 62, -70)
+use_collision = true
+size = Vector3(22, 116, 20)
+material = SubResource("Mat_glass_office")
+
+[node name="Skyscraper_Gamma" type="CSGBox3D" parent="Downtown" unique_id=1213740709]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 55, 70, -55)
+use_collision = true
+size = Vector3(32, 140, 30)
+material = SubResource("Mat_glass_office")
+
+[node name="Skyscraper_Gamma_Setback" type="CSGBox3D" parent="Downtown" unique_id=1163919665]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 55, 110, -55)
+use_collision = true
+size = Vector3(22, 60, 22)
+material = SubResource("Mat_glass_neon")
+
+[node name="Skyscraper_Delta" type="CSGBox3D" parent="Downtown" unique_id=1033652778]
+transform = Transform3D(0.985, 0, 0.174, 0, 1, 0, -0.174, 0, 0.985, -55, 45, -80)
+use_collision = true
+size = Vector3(20, 90, 20)
+material = SubResource("Mat_concrete_stained")
+
+[node name="Tower_Corporate_A" type="CSGBox3D" parent="Downtown" unique_id=1235483168]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 35, -90)
+use_collision = true
+size = Vector3(18, 70, 18)
+material = SubResource("Mat_glass_office")
+
+[node name="Tower_Corporate_B" type="CSGBox3D" parent="Downtown" unique_id=1098606099]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -55, 25, -45)
+use_collision = true
+size = Vector3(16, 50, 16)
+material = SubResource("Mat_concrete_dark")
+
+[node name="Tower_Corporate_C" type="CSGBox3D" parent="Downtown" unique_id=1214957365]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 20, -35)
+use_collision = true
+size = Vector3(14, 40, 14)
+material = SubResource("Mat_brick")
+
+[node name="Midrise_A" type="CSGBox3D" parent="Downtown" unique_id=1523257966]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 18, -30)
+use_collision = true
+size = Vector3(22, 36, 18)
+material = SubResource("Mat_brick")
+
+[node name="Midrise_B" type="CSGBox3D" parent="Downtown" unique_id=110866429]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30, 14, -32)
+use_collision = true
+size = Vector3(18, 28, 16)
+material = SubResource("Mat_concrete_stained")
+
+[node name="Midrise_C" type="CSGBox3D" parent="Downtown" unique_id=1156185516]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -42, 12, -30)
+use_collision = true
+size = Vector3(20, 24, 14)
+material = SubResource("Mat_concrete_dark")
+
+[node name="Plaza_Ground" type="CSGBox3D" parent="Downtown" unique_id=1916973097]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.15, -42)
+use_collision = true
+size = Vector3(40, 0.3, 20)
+material = SubResource("Mat_sidewalk")
+
+[node name="Plaza_Fountain_Base" type="CSGCylinder3D" parent="Downtown" unique_id=1123373417]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, -42)
+use_collision = true
+radius = 4.5
+height = 1.5
+material = SubResource("Mat_concrete_dark")
+
+[node name="Plaza_Fountain_Water" type="CSGCylinder3D" parent="Downtown" unique_id=522331277]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -42)
+radius = 3.8
+height = 0.5
+material = SubResource("Mat_water")
+
+[node name="Plaza_Fountain_Spout" type="CSGCylinder3D" parent="Downtown" unique_id=1590697038]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, -42)
+radius = 0.15
+height = 3.5
+material = SubResource("Mat_water")
+
+[node name="NeonSigns_Downtown" type="Node3D" parent="Downtown" unique_id=1897154987]
+
+[node name="NeonSigns_Downtown#Neon_HOTEL_H" type="MeshInstance3D" parent="." unique_id=325277729]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 28, -21.5)
+mesh = SubResource("BM_neon_sign_h")
+surface_material_override/0 = SubResource("Mat_neon_red")
+
+[node name="NeonSigns_Downtown#Neon_BAR_H" type="MeshInstance3D" parent="." unique_id=1137557893]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30, 22, -23.5)
+mesh = SubResource("BM_neon_sign_h")
+surface_material_override/0 = SubResource("Mat_neon_cyan")
+
+[node name="NeonSigns_Downtown#Neon_PHARMACY_H" type="MeshInstance3D" parent="." unique_id=1350411058]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -42, 18, -22)
+mesh = SubResource("BM_neon_sign_h")
+surface_material_override/0 = SubResource("Mat_neon_green")
+
+[node name="NeonSigns_Downtown#Neon_CASINO_H" type="MeshInstance3D" parent="." unique_id=1472510082]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 55, 35, -40)
+mesh = SubResource("BM_neon_sign_h")
+surface_material_override/0 = SubResource("Mat_neon_amber")
+
+[node name="NeonSigns_Downtown#Neon_CLUB_V" type="MeshInstance3D" parent="." unique_id=1877289362]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -29, 45, -43.5)
+mesh = SubResource("BM_neon_sign_v")
+surface_material_override/0 = SubResource("Mat_neon_purple")
+
+[node name="NeonSigns_Downtown#PointLight_Neon1" type="OmniLight3D" parent="." unique_id=689928749]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 28, -21)
+light_color = Color(1, 0.1, 0.1, 1)
+light_energy = 4.5
+omni_range = 18.0
+
+[node name="NeonSigns_Downtown#PointLight_Neon2" type="OmniLight3D" parent="." unique_id=1616048720]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30, 22, -23)
+light_color = Color(0, 0.9, 0.85, 1)
+light_energy = 4.0
+omni_range = 16.0
+
+[node name="NeonSigns_Downtown#PointLight_Neon3" type="OmniLight3D" parent="." unique_id=1602226921]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -42, 18, -22)
+light_color = Color(0.1, 1, 0.2, 1)
+light_energy = 3.5
+omni_range = 14.0
+
+[node name="NeonSigns_Downtown#PointLight_Neon4" type="OmniLight3D" parent="." unique_id=440937514]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 55, 35, -39)
+light_color = Color(1, 0.55, 0, 1)
+light_energy = 5.0
+omni_range = 20.0
+
+[node name="Roads" type="Node3D" parent="." unique_id=1462034079]
+
+[node name="Road_MainAve_N" type="CSGBox3D" parent="Roads" unique_id=1769692064]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.06, -50)
+use_collision = true
+size = Vector3(16, 0.12, 400)
+material = SubResource("Mat_asphalt")
+
+[node name="Road_MainAve_E" type="CSGBox3D" parent="Roads" unique_id=865278617]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 50, 0.06, 0)
+use_collision = true
+size = Vector3(400, 0.12, 16)
+material = SubResource("Mat_asphalt")
+
+[node name="Road_CrossSt_1" type="CSGBox3D" parent="Roads" unique_id=176069854]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 50, 0.06, -80)
+use_collision = true
+size = Vector3(200, 0.12, 12)
+material = SubResource("Mat_asphalt")
+
+[node name="Road_CrossSt_2" type="CSGBox3D" parent="Roads" unique_id=1449896132]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 50, 0.06, 50)
+use_collision = true
+size = Vector3(200, 0.12, 12)
+material = SubResource("Mat_asphalt")
+
+[node name="Road_CrossSt_3" type="CSGBox3D" parent="Roads" unique_id=856271022]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 50, 0.06, -150)
+use_collision = true
+size = Vector3(200, 0.12, 12)
+material = SubResource("Mat_asphalt")
+
+[node name="Road_Industrial_Loop" type="CSGBox3D" parent="Roads" unique_id=2053621487]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -160, 0.06, 80)
+use_collision = true
+size = Vector3(200, 0.12, 14)
+material = SubResource("Mat_asphalt")
+
+[node name="Road_Docks_Access" type="CSGBox3D" parent="Roads" unique_id=555337865]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 180, 0.06, 120)
+use_collision = true
+size = Vector3(14, 0.12, 160)
+material = SubResource("Mat_asphalt")
+
+[node name="Road_Airport_Runway_1" type="CSGBox3D" parent="Roads" unique_id=569449819]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -80, 0.06, -180)
+use_collision = true
+size = Vector3(60, 0.12, 180)
+material = SubResource("Mat_asphalt")
+
+[node name="Road_Airport_Taxiway" type="CSGBox3D" parent="Roads" unique_id=351788016]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -140, 0.06, -220)
+use_collision = true
+size = Vector3(100, 0.12, 22)
+material = SubResource("Mat_asphalt")
+
+[node name="Sidewalk_MainAve_L" type="CSGBox3D" parent="Roads" unique_id=612712050]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 0.16, -50)
+use_collision = true
+size = Vector3(4, 0.22, 400)
+material = SubResource("Mat_sidewalk")
+
+[node name="Sidewalk_MainAve_R" type="CSGBox3D" parent="Roads" unique_id=1607595325]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0.16, -50)
+use_collision = true
+size = Vector3(4, 0.22, 400)
+material = SubResource("Mat_sidewalk")
+
+[node name="Highway_Overpass_Deck" type="CSGBox3D" parent="Roads" unique_id=1870399742]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 465.1245, -16.725784, 140.32729)
+use_collision = true
+size = Vector3(400, 0.5, 20)
+material = SubResource("Mat_asphalt")
+
+[node name="Highway_Support_A" type="CSGBox3D" parent="Roads" unique_id=827623817]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -60, 4, 0)
+use_collision = true
+size = Vector3(3, 9, 3)
+material = SubResource("Mat_concrete_dark")
+
+[node name="Highway_Support_B" type="CSGBox3D" parent="Roads" unique_id=710613524]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -100, 4, 0)
+use_collision = true
+size = Vector3(3, 9, 3)
+material = SubResource("Mat_concrete_dark")
+
+[node name="Highway_Support_C" type="CSGBox3D" parent="Roads" unique_id=2140494052]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -140, 4, 0)
+use_collision = true
+size = Vector3(3, 9, 3)
+material = SubResource("Mat_concrete_dark")
+
+[node name="Highway_Support_D" type="CSGBox3D" parent="Roads" unique_id=22586655]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -180, 4, 0)
+use_collision = true
+size = Vector3(3, 9, 3)
+material = SubResource("Mat_concrete_dark")
+
+[node name="Highway_Guardrail_L" type="MeshInstance3D" parent="Roads" unique_id=474042106]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -100, 9.2, -10)
+mesh = SubResource("BM_guard_rail")
+surface_material_override/0 = SubResource("Mat_metal_clean")
+
+[node name="Highway_Guardrail_R" type="MeshInstance3D" parent="Roads" unique_id=412840738]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -100, 9.2, 10)
+mesh = SubResource("BM_guard_rail")
+surface_material_override/0 = SubResource("Mat_metal_clean")
+
+[node name="Bridge_MainAve_Deck" type="CSGBox3D" parent="Roads" unique_id=701062940]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0.8, 0)
+use_collision = true
+size = Vector3(16, 0.5, 18)
+material = SubResource("Mat_asphalt")
+
+[node name="Bridge_Support_L" type="CSGBox3D" parent="Roads" unique_id=1218214406]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, -0.5, 0)
+use_collision = true
+size = Vector3(2.5, 3.5, 18)
+material = SubResource("Mat_concrete_dark")
+
+[node name="Bridge_Support_R" type="CSGBox3D" parent="Roads" unique_id=127001747]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, -0.5, 0)
+use_collision = true
+size = Vector3(2.5, 3.5, 18)
+material = SubResource("Mat_concrete_dark")
+
+[node name="Industrial" type="Node3D" parent="." unique_id=809270123]
+
+[node name="Factory_Main" type="CSGBox3D" parent="Industrial" unique_id=61467549]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -130, 15, 60)
+use_collision = true
+size = Vector3(55, 30, 40)
+material = SubResource("Mat_corrugated_metal")
+
+[node name="Factory_Main_Roof" type="CSGBox3D" parent="Industrial" unique_id=604428751]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -130, 31, 60)
+use_collision = true
+size = Vector3(57, 2, 42)
+material = SubResource("Mat_metal_rusty")
+
+[node name="Factory_Annex" type="CSGBox3D" parent="Industrial" unique_id=299325270]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -170, 10, 50)
+use_collision = true
+size = Vector3(30, 20, 30)
+material = SubResource("Mat_corrugated_metal")
+
+[node name="Warehouse_A" type="CSGBox3D" parent="Industrial" unique_id=1345019940]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -140, 8, 110)
+use_collision = true
+size = Vector3(50, 16, 35)
+material = SubResource("Mat_corrugated_metal")
+
+[node name="Warehouse_B" type="CSGBox3D" parent="Industrial" unique_id=1384464724]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -190, 8, 120)
+use_collision = true
+size = Vector3(40, 16, 30)
+material = SubResource("Mat_corrugated_metal")
+
+[node name="Warehouse_C" type="CSGBox3D" parent="Industrial" unique_id=2105090902]
+transform = Transform3D(0.985, 0, 0.174, 0, 1, 0, -0.174, 0, 0.985, -110, 7, 140)
+use_collision = true
+size = Vector3(35, 14, 28)
+material = SubResource("Mat_concrete_stained")
+
+[node name="OilTank_A" type="MeshInstance3D" parent="Industrial" unique_id=1147528344]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -120, 8, 170)
+mesh = SubResource("CM_tank")
+surface_material_override/0 = SubResource("Mat_oil_tank")
+
+[node name="OilTank_B" type="MeshInstance3D" parent="Industrial" unique_id=1513065607]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -145, 8, 175)
+mesh = SubResource("CM_tank")
+surface_material_override/0 = SubResource("Mat_oil_tank")
+
+[node name="OilTank_C" type="MeshInstance3D" parent="Industrial" unique_id=932085529]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -165, 8, 165)
+mesh = SubResource("CM_tank")
+surface_material_override/0 = SubResource("Mat_oil_tank")
+
+[node name="Chimney_A" type="MeshInstance3D" parent="Industrial" unique_id=36480180]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -130, 20, 55)
+mesh = SubResource("CM_chimney")
+surface_material_override/0 = SubResource("Mat_chimney")
+
+[node name="Chimney_B" type="MeshInstance3D" parent="Industrial" unique_id=1342061450]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -115, 20, 70)
+mesh = SubResource("CM_chimney")
+surface_material_override/0 = SubResource("Mat_chimney")
+
+[node name="Industrial_Wall_N" type="CSGBox3D" parent="Industrial" unique_id=187605238]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -155, 3, 25)
+use_collision = true
+size = Vector3(120, 6, 1.2)
+material = SubResource("Mat_concrete_dark")
+
+[node name="Industrial_Fence_N" type="CSGBox3D" parent="Industrial" unique_id=1478419349]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -155, 4, 23)
+use_collision = true
+size = Vector3(120, 2.5, 0.15)
+material = SubResource("Mat_metal_rusty")
+
+[node name="Light_Industrial_A" type="SpotLight3D" parent="Industrial" unique_id=756497431]
+transform = Transform3D(1, 0, 0, 0, -0.707, 0.707, 0, -0.707, -0.707, -130, 34, 55)
+light_color = Color(1, 0.65, 0.3, 1)
+light_energy = 12.0
+shadow_enabled = true
+spot_range = 35.0
+spot_angle = 38.0
+
+[node name="Light_Industrial_B" type="SpotLight3D" parent="Industrial" unique_id=250166179]
+transform = Transform3D(1, 0, 0, 0, -0.707, 0.707, 0, -0.707, -0.707, -140, 18, 110)
+light_color = Color(1, 0.7, 0.35, 1)
+light_energy = 10.0
+spot_range = 28.0
+spot_angle = 40.0
+
+[node name="Port" type="Node3D" parent="." unique_id=1689179342]
+
+[node name="Port_HarborMaster" type="CSGBox3D" parent="Port" unique_id=793192198]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 130, 6, 60)
+use_collision = true
+size = Vector3(18, 12, 14)
+material = SubResource("Mat_concrete_dark")
+
+[node name="Port_Customs_Building" type="CSGBox3D" parent="Port" unique_id=2004689213]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 160, 5, 55)
+use_collision = true
+size = Vector3(22, 10, 16)
+material = SubResource("Mat_concrete_stained")
+
+[node name="Crane_Tower_A" type="CSGBox3D" parent="Port" unique_id=1097772758]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 185, 30, 120)
+use_collision = true
+size = Vector3(4, 60, 4)
+material = SubResource("Mat_steel_beam")
+
+[node name="Crane_Boom_A" type="CSGBox3D" parent="Port" unique_id=1790739517]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 185, 62, 108)
+use_collision = true
+size = Vector3(2.5, 2.5, 28)
+material = SubResource("Mat_steel_beam")
+
+[node name="Crane_Cable_A" type="CSGBox3D" parent="Port" unique_id=1661181412]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 185, 48, 122)
+size = Vector3(0.2, 28, 0.2)
+material = SubResource("Mat_metal_clean")
+
+[node name="Crane_Tower_B" type="CSGBox3D" parent="Port" unique_id=825433787]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 210, 30, 140)
+use_collision = true
+size = Vector3(4, 60, 4)
+material = SubResource("Mat_steel_beam")
+
+[node name="Crane_Boom_B" type="CSGBox3D" parent="Port" unique_id=1845071242]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 210, 62, 128)
+use_collision = true
+size = Vector3(2.5, 2.5, 28)
+material = SubResource("Mat_steel_beam")
+
+[node name="Containers_Stack" type="Node3D" parent="Port" unique_id=1369808815]
+
+[node name="Cont_R_1" type="RigidBody3D" parent="Port/Containers_Stack" unique_id=1978405253]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 140, 1.25, 90)
+mass = 2000.0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Port/Containers_Stack/Cont_R_1" unique_id=590686974]
+shape = SubResource("BS_container")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Port/Containers_Stack/Cont_R_1" unique_id=1938579545]
+mesh = SubResource("BM_container")
+surface_material_override/0 = SubResource("Mat_shipping_container_red")
+
+[node name="Cont_B_1" type="RigidBody3D" parent="Port/Containers_Stack" unique_id=10896975]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 147, 1.25, 90)
+mass = 2000.0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Port/Containers_Stack/Cont_B_1" unique_id=2134547978]
+shape = SubResource("BS_container")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Port/Containers_Stack/Cont_B_1" unique_id=904675692]
+mesh = SubResource("BM_container")
+surface_material_override/0 = SubResource("Mat_shipping_container_blue")
+
+[node name="Cont_G_1" type="RigidBody3D" parent="Port/Containers_Stack" unique_id=1791260857]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 154, 1.25, 90)
+mass = 2000.0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Port/Containers_Stack/Cont_G_1" unique_id=1509758005]
+shape = SubResource("BS_container")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Port/Containers_Stack/Cont_G_1" unique_id=1055493079]
+mesh = SubResource("BM_container")
+surface_material_override/0 = SubResource("Mat_shipping_container_green")
+
+[node name="Cont_Y_1" type="RigidBody3D" parent="Port/Containers_Stack" unique_id=546891565]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 140, 3.75, 90)
+mass = 2000.0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Port/Containers_Stack/Cont_Y_1" unique_id=2027446249]
+shape = SubResource("BS_container")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Port/Containers_Stack/Cont_Y_1" unique_id=416610909]
+mesh = SubResource("BM_container")
+surface_material_override/0 = SubResource("Mat_shipping_container_yellow")
+
+[node name="Cont_R_2" type="RigidBody3D" parent="Port/Containers_Stack" unique_id=1555939208]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 147, 3.75, 90)
+mass = 2000.0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Port/Containers_Stack/Cont_R_2" unique_id=1253546917]
+shape = SubResource("BS_container")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Port/Containers_Stack/Cont_R_2" unique_id=1139646536]
+mesh = SubResource("BM_container")
+surface_material_override/0 = SubResource("Mat_shipping_container_red")
+
+[node name="Cont_B_2" type="RigidBody3D" parent="Port/Containers_Stack" unique_id=1536574591]
+transform = Transform3D(0.985, 0, 0.174, 0, 1, 0, -0.174, 0, 0.985, 163, 1.25, 98)
+mass = 2000.0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Port/Containers_Stack/Cont_B_2" unique_id=615687362]
+shape = SubResource("BS_container")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Port/Containers_Stack/Cont_B_2" unique_id=436127180]
+mesh = SubResource("BM_container")
+surface_material_override/0 = SubResource("Mat_shipping_container_blue")
+
+[node name="Jetty_A" type="CSGBox3D" parent="Port" unique_id=455466710]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 220, 0.1, 130)
+use_collision = true
+size = Vector3(8, 0.8, 60)
+material = SubResource("Mat_wood_worn")
+
+[node name="Jetty_B" type="CSGBox3D" parent="Port" unique_id=818571979]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 235, 0.1, 150)
+use_collision = true
+size = Vector3(8, 0.8, 50)
+material = SubResource("Mat_wood_worn")
+
+[node name="Slums" type="Node3D" parent="." unique_id=232194133]
+
+[node name="Slum_Block_A1" type="CSGBox3D" parent="Slums" unique_id=1478843115]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 75, 5, -30)
+use_collision = true
+size = Vector3(14, 10, 12)
+material = SubResource("Mat_corrugated_metal")
+
+[node name="Slum_Block_A2" type="CSGBox3D" parent="Slums" unique_id=396965731]
+transform = Transform3D(0.998, 0, 0.07, 0, 1, 0, -0.07, 0, 0.998, 92, 4, -28)
+use_collision = true
+size = Vector3(10, 8, 10)
+material = SubResource("Mat_brick")
+
+[node name="Slum_Block_A3" type="CSGBox3D" parent="Slums" unique_id=897296697]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 80, 6, -45)
+use_collision = true
+size = Vector3(12, 12, 10)
+material = SubResource("Mat_corrugated_metal")
+
+[node name="Slum_Block_B1" type="CSGBox3D" parent="Slums" unique_id=785766945]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 105, 5, -25)
+use_collision = true
+size = Vector3(16, 10, 14)
+material = SubResource("Mat_brick")
+
+[node name="Slum_Block_B2" type="CSGBox3D" parent="Slums" unique_id=1926672501]
+transform = Transform3D(0.995, 0, -0.1, 0, 1, 0, 0.1, 0, 0.995, 122, 7, -35)
+use_collision = true
+size = Vector3(18, 14, 12)
+material = SubResource("Mat_concrete_stained")
+
+[node name="Slum_Block_C1" type="CSGBox3D" parent="Slums" unique_id=1509643222]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 88, 8, -62)
+use_collision = true
+size = Vector3(20, 16, 16)
+material = SubResource("Mat_brick")
+
+[node name="Slum_Block_C2" type="CSGBox3D" parent="Slums" unique_id=1434792980]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 72, 6, -70)
+use_collision = true
+size = Vector3(14, 12, 14)
+material = SubResource("Mat_corrugated_metal")
+
+[node name="Slum_Block_C3" type="CSGBox3D" parent="Slums" unique_id=1164726388]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 115, 5, -65)
+use_collision = true
+size = Vector3(12, 10, 12)
+material = SubResource("Mat_brick")
+
+[node name="Slum_Block_D1" type="CSGBox3D" parent="Slums" unique_id=1898605760]
+transform = Transform3D(0.996, 0, 0.087, 0, 1, 0, -0.087, 0, 0.996, 95, 9, -88)
+use_collision = true
+size = Vector3(22, 18, 16)
+material = SubResource("Mat_concrete_stained")
+
+[node name="Slum_Block_D2" type="CSGBox3D" parent="Slums" unique_id=1136901127]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 75, 7, -95)
+use_collision = true
+size = Vector3(16, 14, 12)
+material = SubResource("Mat_brick")
+
+[node name="Slum_Block_E1" type="CSGBox3D" parent="Slums" unique_id=466853598]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 112, 6, -100)
+use_collision = true
+size = Vector3(18, 12, 16)
+material = SubResource("Mat_corrugated_metal")
+
+[node name="Slum_Block_E2" type="CSGBox3D" parent="Slums" unique_id=537279847]
+transform = Transform3D(0.995, 0, 0.1, 0, 1, 0, -0.1, 0, 0.995, 85, 5, -115)
+use_collision = true
+size = Vector3(14, 10, 12)
+material = SubResource("Mat_brick")
+
+[node name="Slum_Connector_1" type="CSGBox3D" parent="Slums" unique_id=1788469498]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 84, 9, -52)
+use_collision = true
+size = Vector3(4, 4, 16)
+material = SubResource("Mat_corrugated_metal")
+
+[node name="Slum_Connector_2" type="CSGBox3D" parent="Slums" unique_id=647144752]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100, 8, -75)
+use_collision = true
+size = Vector3(16, 3, 4)
+material = SubResource("Mat_wood_worn")
+
+[node name="Slum_RoofShack_A" type="CSGBox3D" parent="Slums" unique_id=1961091023]
+transform = Transform3D(0.998, 0, 0.07, 0, 1, 0, -0.07, 0, 0.998, 88, 17, -62)
+use_collision = true
+size = Vector3(6, 3, 5)
+material = SubResource("Mat_corrugated_metal")
+
+[node name="Slum_RoofShack_B" type="CSGBox3D" parent="Slums" unique_id=846307685]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 95, 19, -88)
+use_collision = true
+size = Vector3(5, 2.5, 4)
+material = SubResource("Mat_corrugated_metal")
+
+[node name="Neon_Slum_1" type="OmniLight3D" parent="Slums" unique_id=18527750]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 80, 12, -45)
+light_color = Color(1, 0.2, 0.05, 1)
+light_energy = 2.5
+omni_range = 12.0
+
+[node name="Neon_Slum_2" type="OmniLight3D" parent="Slums" unique_id=295767160]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 115, 10, -25)
+light_color = Color(0.9, 0.6, 0, 1)
+light_energy = 2.0
+omni_range = 10.0
+
+[node name="Neon_Slum_3" type="OmniLight3D" parent="Slums" unique_id=1896294340]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 95, 10, -90)
+light_color = Color(0.5, 0, 1, 1)
+light_energy = 1.8
+omni_range = 10.0
+
+[node name="Suburbs" type="Node3D" parent="." unique_id=883653981]
+
+[node name="House_A1" type="CSGBox3D" parent="Suburbs" unique_id=796527448]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -65, 4, -80)
+use_collision = true
+size = Vector3(14, 8, 12)
+material = SubResource("Mat_brick")
+
+[node name="House_A1_Roof" type="CSGBox3D" parent="Suburbs" unique_id=1553904760]
+transform = Transform3D(1, 0.01, 0, -0.01, 1, 0, 0, 0, 1, -65, 9.5, -80)
+use_collision = true
+size = Vector3(16, 3.5, 14)
+material = SubResource("Mat_corrugated_metal")
+
+[node name="House_A2" type="CSGBox3D" parent="Suburbs" unique_id=1066729950]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -85, 4, -80)
+use_collision = true
+size = Vector3(13, 8, 11)
+material = SubResource("Mat_concrete_stained")
+
+[node name="House_A2_Roof" type="CSGBox3D" parent="Suburbs" unique_id=614854940]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -85, 9.5, -80)
+use_collision = true
+size = Vector3(15, 3, 13)
+material = SubResource("Mat_corrugated_metal")
+
+[node name="House_B1" type="CSGBox3D" parent="Suburbs" unique_id=299748309]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -65, 4, -100)
+use_collision = true
+size = Vector3(14, 8, 12)
+material = SubResource("Mat_brick")
+
+[node name="House_B2" type="CSGBox3D" parent="Suburbs" unique_id=1653209051]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -85, 4, -100)
+use_collision = true
+size = Vector3(12, 8, 11)
+material = SubResource("Mat_brick")
+
+[node name="House_B3" type="CSGBox3D" parent="Suburbs" unique_id=990132285]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -105, 4, -98)
+use_collision = true
+size = Vector3(13, 8, 12)
+material = SubResource("Mat_concrete_stained")
+
+[node name="House_C1" type="CSGBox3D" parent="Suburbs" unique_id=63150732]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -68, 5, -120)
+use_collision = true
+size = Vector3(16, 10, 14)
+material = SubResource("Mat_brick")
+
+[node name="House_C2" type="CSGBox3D" parent="Suburbs" unique_id=1278976544]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -90, 4, -118)
+use_collision = true
+size = Vector3(13, 8, 11)
+material = SubResource("Mat_concrete_stained")
+
+[node name="House_C3" type="CSGBox3D" parent="Suburbs" unique_id=572596510]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -110, 4, -122)
+use_collision = true
+size = Vector3(14, 8, 12)
+material = SubResource("Mat_brick")
+
+[node name="Suburb_Fence_A" type="CSGBox3D" parent="Suburbs" unique_id=306999340]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -65, 1.2, -73)
+use_collision = true
+size = Vector3(16, 1.8, 0.2)
+material = SubResource("Mat_wood_worn")
+
+[node name="Suburb_Fence_B" type="CSGBox3D" parent="Suburbs" unique_id=894640437]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -85, 1.2, -73)
+use_collision = true
+size = Vector3(14, 1.8, 0.2)
+material = SubResource("Mat_wood_worn")
+
+[node name="Airport" type="Node3D" parent="." unique_id=403862027]
+
+[node name="Terminal_Main" type="CSGBox3D" parent="Airport" unique_id=951246304]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -90, 10, -200)
+use_collision = true
+size = Vector3(120, 20, 28)
+material = SubResource("Mat_glass_office")
+
+[node name="Terminal_Main_Base" type="CSGBox3D" parent="Airport" unique_id=1830196284]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -90, 4, -200)
+use_collision = true
+size = Vector3(124, 8, 32)
+material = SubResource("Mat_concrete_dark")
+
+[node name="Terminal_Concourse_A" type="CSGBox3D" parent="Airport" unique_id=1311964756]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -50, 7, -230)
+use_collision = true
+size = Vector3(22, 14, 80)
+material = SubResource("Mat_glass_office")
+
+[node name="Terminal_Concourse_B" type="CSGBox3D" parent="Airport" unique_id=272330629]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -130, 7, -230)
+use_collision = true
+size = Vector3(22, 14, 80)
+material = SubResource("Mat_glass_office")
+
+[node name="Hangar_A" type="CSGBox3D" parent="Airport" unique_id=83208172]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -60, 12, -170)
+use_collision = true
+size = Vector3(50, 24, 40)
+material = SubResource("Mat_corrugated_metal")
+
+[node name="Hangar_B" type="CSGBox3D" parent="Airport" unique_id=1389049598]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -125, 12, -170)
+use_collision = true
+size = Vector3(50, 24, 40)
+material = SubResource("Mat_corrugated_metal")
+
+[node name="Control_Tower_Shaft" type="CSGBox3D" parent="Airport" unique_id=1511013259]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -90, 28, -180)
+use_collision = true
+size = Vector3(8, 56, 8)
+material = SubResource("Mat_concrete_dark")
+
+[node name="Control_Tower_Cab" type="CSGBox3D" parent="Airport" unique_id=481506668]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -90, 59, -180)
+use_collision = true
+size = Vector3(14, 6, 14)
+material = SubResource("Mat_glass_neon")
+
+[node name="Runway_Centerline_A" type="CSGBox3D" parent="Airport" unique_id=1970396780]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -80, 0.07, -180)
+size = Vector3(1.5, 0.06, 180)
+material = SubResource("Mat_road_markings")
+
+[node name="Airport_Light_A" type="OmniLight3D" parent="Airport" unique_id=2011578261]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -90, 62, -180)
+light_color = Color(0.5, 0.9, 1, 1)
+light_energy = 6.0
+shadow_enabled = true
+omni_range = 45.0
+
+[node name="Underground" type="Node3D" parent="." unique_id=1623740366]
+
+[node name="Tunnel_MainAve_N" type="CSGBox3D" parent="Underground" unique_id=543602631]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -6, -40)
+use_collision = true
+size = Vector3(9, 5, 240)
+material = SubResource("Mat_concrete_dark")
+
+[node name="Tunnel_EastWest" type="CSGBox3D" parent="Underground" unique_id=1849414763]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30, -6, 20)
+use_collision = true
+size = Vector3(180, 5, 9)
+material = SubResource("Mat_concrete_dark")
+
+[node name="Tunnel_Station_Central" type="CSGBox3D" parent="Underground" unique_id=1590848560]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -5, 20)
+use_collision = true
+size = Vector3(24, 7, 50)
+material = SubResource("Mat_concrete_dark")
+
+[node name="Tunnel_Platform_L" type="CSGBox3D" parent="Underground" unique_id=2002359994]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9, -2.5, 20)
+use_collision = true
+size = Vector3(3.5, 1.2, 48)
+material = SubResource("Mat_sidewalk")
+
+[node name="Tunnel_Platform_R" type="CSGBox3D" parent="Underground" unique_id=2067392019]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9, -2.5, 20)
+use_collision = true
+size = Vector3(3.5, 1.2, 48)
+material = SubResource("Mat_sidewalk")
+
+[node name="Tunnel_Tracks_L" type="CSGBox3D" parent="Underground" unique_id=953709635]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.5, -4.8, -40)
+use_collision = true
+size = Vector3(0.15, 0.15, 240)
+material = SubResource("Mat_metal_clean")
+
+[node name="Tunnel_Tracks_R" type="CSGBox3D" parent="Underground" unique_id=526552011]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, -4.8, -40)
+use_collision = true
+size = Vector3(0.15, 0.15, 240)
+material = SubResource("Mat_metal_clean")
+
+[node name="Tunnel_Light_A" type="OmniLight3D" parent="Underground" unique_id=1933372813]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -3, 20)
+light_color = Color(0.9, 0.85, 0.7, 1)
+light_energy = 5.0
+omni_range = 22.0
+
+[node name="Tunnel_Light_B" type="OmniLight3D" parent="Underground" unique_id=452566422]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -3.5, -30)
+light_color = Color(0.7, 0.75, 0.9, 1)
+light_energy = 3.0
+omni_range = 14.0
+
+[node name="Tunnel_Light_C" type="OmniLight3D" parent="Underground" unique_id=272399658]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -3.5, -80)
+light_color = Color(0.7, 0.75, 0.9, 1)
+light_energy = 2.5
+omni_range = 12.0
+
+[node name="Tunnel_EmergencyLight_A" type="OmniLight3D" parent="Underground" unique_id=275509488]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -4, -60)
+light_color = Color(1, 0.1, 0.05, 1)
+light_energy = 1.5
+omni_range = 6.0
+
+[node name="StreetFurniture" type="Node3D" parent="." unique_id=1795539034]
+
+[node name="Lamp_MainAve_L1" type="Node3D" parent="StreetFurniture" unique_id=1499967381]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13, 0, -20)
+
+[node name="Post" type="MeshInstance3D" parent="StreetFurniture/Lamp_MainAve_L1" unique_id=797637592]
+mesh = SubResource("CM_lamppost")
+surface_material_override/0 = SubResource("Mat_metal_clean")
+
+[node name="Globe" type="MeshInstance3D" parent="StreetFurniture/Lamp_MainAve_L1" unique_id=628170721]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.3, 0)
+mesh = SubResource("SM_lamp")
+surface_material_override/0 = SubResource("Mat_neon_amber")
+
+[node name="Light" type="OmniLight3D" parent="StreetFurniture/Lamp_MainAve_L1" unique_id=1174343671]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.5, 0)
+light_color = Color(1, 0.75, 0.4, 1)
+light_energy = 3.0
+omni_range = 16.0
+
+[node name="Lamp_MainAve_L2" type="Node3D" parent="StreetFurniture" unique_id=1100772528]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13, 0, -50)
+
+[node name="Post" type="MeshInstance3D" parent="StreetFurniture/Lamp_MainAve_L2" unique_id=288261765]
+mesh = SubResource("CM_lamppost")
+surface_material_override/0 = SubResource("Mat_metal_clean")
+
+[node name="Globe" type="MeshInstance3D" parent="StreetFurniture/Lamp_MainAve_L2" unique_id=1261728906]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.3, 0)
+mesh = SubResource("SM_lamp")
+surface_material_override/0 = SubResource("Mat_neon_amber")
+
+[node name="Light" type="OmniLight3D" parent="StreetFurniture/Lamp_MainAve_L2" unique_id=924382653]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.5, 0)
+light_color = Color(1, 0.75, 0.4, 1)
+light_energy = 3.0
+omni_range = 16.0
+
+[node name="Lamp_MainAve_R1" type="Node3D" parent="StreetFurniture" unique_id=1487780626]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13, 0, -20)
+
+[node name="Post" type="MeshInstance3D" parent="StreetFurniture/Lamp_MainAve_R1" unique_id=265038860]
+mesh = SubResource("CM_lamppost")
+surface_material_override/0 = SubResource("Mat_metal_clean")
+
+[node name="Globe" type="MeshInstance3D" parent="StreetFurniture/Lamp_MainAve_R1" unique_id=1974887198]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.3, 0)
+mesh = SubResource("SM_lamp")
+surface_material_override/0 = SubResource("Mat_neon_amber")
+
+[node name="Light" type="OmniLight3D" parent="StreetFurniture/Lamp_MainAve_R1" unique_id=1214845873]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.5, 0)
+light_color = Color(1, 0.75, 0.4, 1)
+light_energy = 3.0
+omni_range = 16.0
+
+[node name="Lamp_MainAve_R2" type="Node3D" parent="StreetFurniture" unique_id=172033858]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13, 0, -50)
+
+[node name="Post" type="MeshInstance3D" parent="StreetFurniture/Lamp_MainAve_R2" unique_id=154886206]
+mesh = SubResource("CM_lamppost")
+surface_material_override/0 = SubResource("Mat_metal_clean")
+
+[node name="Globe" type="MeshInstance3D" parent="StreetFurniture/Lamp_MainAve_R2" unique_id=715092043]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.3, 0)
+mesh = SubResource("SM_lamp")
+surface_material_override/0 = SubResource("Mat_neon_amber")
+
+[node name="Light" type="OmniLight3D" parent="StreetFurniture/Lamp_MainAve_R2" unique_id=166658585]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.5, 0)
+light_color = Color(1, 0.75, 0.4, 1)
+light_energy = 3.0
+omni_range = 16.0
+
+[node name="TrafficLight_Intersection_A" type="Node3D" parent="StreetFurniture" unique_id=2040048808]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0, 10)
+
+[node name="TL_Pole" type="CSGCylinder3D" parent="StreetFurniture/TrafficLight_Intersection_A" unique_id=36176197]
+radius = 0.12
+height = 7.5
+material = SubResource("Mat_metal_clean")
+
+[node name="TL_Box" type="CSGBox3D" parent="StreetFurniture/TrafficLight_Intersection_A" unique_id=413437498]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.5, 0)
+size = Vector3(0.6, 1.8, 0.4)
+material = SubResource("Mat_plastic_dark")
+
+[node name="TL_Red" type="OmniLight3D" parent="StreetFurniture/TrafficLight_Intersection_A" unique_id=1590802706]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.2, 0.2)
+light_color = Color(1, 0.05, 0, 1)
+light_energy = 2.0
+omni_range = 8.0
+
+[node name="Props" type="Node3D" parent="." unique_id=777983661]
+
+[node name="Debris_A" type="RigidBody3D" parent="Props" unique_id=1440345425]
+transform = Transform3D(0.985, 0, 0.174, 0, 1, 0, -0.174, 0, 0.985, 8, 0.5, -18)
+mass = 15.0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Props/Debris_A" unique_id=502679650]
+shape = SubResource("BS_1x1x1")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Props/Debris_A" unique_id=21809316]
+mesh = SubResource("BM_neon_sign_h")
+surface_material_override/0 = SubResource("Mat_metal_rusty")
+
+[node name="Debris_B" type="RigidBody3D" parent="Props" unique_id=592651561]
+transform = Transform3D(0.866, 0, 0.5, 0, 1, 0, -0.5, 0, 0.866, -6, 0.3, -5)
+mass = 8.0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Props/Debris_B" unique_id=191491467]
+shape = SubResource("BS_1x1x1")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Props/Debris_B" unique_id=1757282901]
+mesh = SubResource("BM_neon_sign_v")
+surface_material_override/0 = SubResource("Mat_concrete_stained")
+
+[node name="Dumpster_A" type="CSGBox3D" parent="Props" unique_id=2081442374]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 1, -22)
+use_collision = true
+size = Vector3(2.4, 1.8, 1.2)
+material = SubResource("Mat_metal_rusty")
+
+[node name="Dumpster_B" type="CSGBox3D" parent="Props" unique_id=1527213420]
+transform = Transform3D(0.996, 0, 0.087, 0, 1, 0, -0.087, 0, 0.996, 22, 1, -8)
+use_collision = true
+size = Vector3(2.4, 1.8, 1.2)
+material = SubResource("Mat_metal_rusty")
+
+[node name="Barrier_A" type="CSGBox3D" parent="Props" unique_id=1683987727]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0.5, -12)
+use_collision = true
+size = Vector3(1.2, 1, 2.5)
+material = SubResource("Mat_concrete_dark")
+
+[node name="Barrier_B" type="CSGBox3D" parent="Props" unique_id=1716999720]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0.5, -12)
+use_collision = true
+size = Vector3(1.2, 1, 2.5)
+material = SubResource("Mat_concrete_dark")
+
+[node name="Perimeter" type="Node3D" parent="." unique_id=127583137]
+
+[node name="Compound_Wall_N" type="CSGBox3D" parent="Perimeter" unique_id=2121247626]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, -20)
+use_collision = true
+size = Vector3(90, 5, 1.2)
+material = SubResource("Mat_brick")
+
+[node name="Compound_Wall_S" type="CSGBox3D" parent="Perimeter" unique_id=1354972552]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 20)
+use_collision = true
+size = Vector3(60, 5, 1.2)
+material = SubResource("Mat_brick")
+
+[node name="Wall_Barbed_N" type="CSGBox3D" parent="Perimeter" unique_id=1732956593]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5.5, -20)
+use_collision = true
+size = Vector3(90, 0.5, 0.5)
+material = SubResource("Mat_metal_rusty")
+
+[node name="Perimeter_Fence_Industrial_N" type="CSGBox3D" parent="Perimeter" unique_id=1655941547]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -155, 2, 25)
+use_collision = true
+size = Vector3(120, 3, 0.2)
+material = SubResource("Mat_metal_rusty")
+
+[node name="Special" type="Node3D" parent="." unique_id=2028759262]
+
+[node name="WaterTower_Tank" type="CSGCylinder3D" parent="Special" unique_id=980127789]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 24, -28)
+use_collision = true
+radius = 4.5
+height = 6.0
+material = SubResource("Mat_wood_worn")
+
+[node name="WaterTower_Legs_A" type="CSGBox3D" parent="Special" unique_id=2119507734]
+transform = Transform3D(0.866, 0, 0.5, 0, 1, 0, -0.5, 0, 0.866, 36, 12, -26)
+use_collision = true
+size = Vector3(0.4, 20, 0.4)
+material = SubResource("Mat_steel_beam")
+
+[node name="WaterTower_Legs_B" type="CSGBox3D" parent="Special" unique_id=1323096987]
+transform = Transform3D(0.866, 0, -0.5, 0, 1, 0, 0.5, 0, 0.866, 44, 12, -26)
+use_collision = true
+size = Vector3(0.4, 20, 0.4)
+material = SubResource("Mat_steel_beam")
+
+[node name="WaterTower_Legs_C" type="CSGBox3D" parent="Special" unique_id=187276247]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 12, -22)
+use_collision = true
+size = Vector3(0.4, 20, 0.4)
+material = SubResource("Mat_steel_beam")
+
+[node name="Billboard_Pole" type="CSGBox3D" parent="Special" unique_id=1062525524]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -35, 10, -22)
+use_collision = true
+size = Vector3(0.8, 20, 0.8)
+material = SubResource("Mat_metal_clean")
+
+[node name="Billboard_Face" type="CSGBox3D" parent="Special" unique_id=676360330]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -35, 22, -22)
+size = Vector3(14, 7, 0.4)
+material = SubResource("Mat_neon_amber")
+
+[node name="Billboard_Light_L" type="SpotLight3D" parent="Special" unique_id=302577196]
+transform = Transform3D(1, 0, 0, 0, 0.966, 0.259, 0, -0.259, 0.966, -43, 20, -20)
+light_color = Color(1, 0.95, 0.8, 1)
+light_energy = 6.0
+spot_range = 20.0
+spot_angle = 30.0
+
+[node name="Billboard_Light_R" type="SpotLight3D" parent="Special" unique_id=1190853049]
+transform = Transform3D(1, 0, 0, 0, 0.966, 0.259, 0, -0.259, 0.966, -27, 20, -20)
+light_color = Color(1, 0.95, 0.8, 1)
+light_energy = 6.0
+spot_range = 20.0
+spot_angle = 30.0
+
+[node name="Helipad_Deck" type="CSGBox3D" parent="Special" unique_id=1462840379]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30, 160.5, -60)
+use_collision = true
+size = Vector3(14, 0.4, 14)
+material = SubResource("Mat_asphalt")
+
+[node name="Helipad_Marking" type="CSGBox3D" parent="Special" unique_id=1746694231]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30, 161, -60)
+size = Vector3(10, 0.1, 10)
+material = SubResource("Mat_road_markings")
+
+[node name="Helipad_Light_A" type="OmniLight3D" parent="Special" unique_id=321137827]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -25, 162, -55)
+light_color = Color(1, 0.3, 0, 1)
+light_energy = 2.0
+omni_range = 8.0
+
+[node name="Helipad_Light_B" type="OmniLight3D" parent="Special" unique_id=433166917]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -35, 162, -65)
+light_color = Color(1, 0.3, 0, 1)
+light_energy = 2.0
+omni_range = 8.0
+
+[node name="SkyBridge_Deck" type="CSGBox3D" parent="Special" unique_id=1888813879]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.5, 55, -62)
+use_collision = true
+size = Vector3(65, 0.8, 6)
+material = SubResource("Mat_glass_office")
+
+[node name="SkyBridge_Rail_L" type="CSGBox3D" parent="Special" unique_id=658735581]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.5, 57, -65)
+size = Vector3(65, 1.2, 0.2)
+material = SubResource("Mat_metal_clean")
+
+[node name="SkyBridge_Rail_R" type="CSGBox3D" parent="Special" unique_id=1084644383]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.5, 57, -59)
+size = Vector3(65, 1.2, 0.2)
+material = SubResource("Mat_metal_clean")
+
+[node name="AmbientLights" type="Node3D" parent="." unique_id=560872648]
+
+[node name="CityGlow_Downtown" type="OmniLight3D" parent="AmbientLights" unique_id=857550735]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 30, -60)
+light_color = Color(0.7, 0.65, 1, 1)
+light_energy = 3.0
+omni_range = 120.0
+
+[node name="CityGlow_Industrial" type="OmniLight3D" parent="AmbientLights" unique_id=725981345]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -150, 25, 80)
+light_color = Color(1, 0.55, 0.15, 1)
+light_energy = 2.5
+omni_range = 100.0
+
+[node name="CityGlow_Port" type="OmniLight3D" parent="AmbientLights" unique_id=1952094905]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 185, 15, 120)
+light_color = Color(0.5, 0.8, 1, 1)
+light_energy = 2.0
+omni_range = 80.0
+
+[node name="CityGlow_Slums" type="OmniLight3D" parent="AmbientLights" unique_id=1951461634]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 95, 10, -70)
+light_color = Color(0.9, 0.45, 0.05, 1)
+light_energy = 1.5
+omni_range = 65.0
+
+[node name="Fire_Barrel_A" type="OmniLight3D" parent="AmbientLights" unique_id=1862954399]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 88, 2, -55)
+light_color = Color(1, 0.4, 0.05, 1)
+light_energy = 5.0
+shadow_enabled = true
+omni_range = 10.0
+
+[node name="Fire_Barrel_B" type="OmniLight3D" parent="AmbientLights" unique_id=553798634]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 112, 2, -65)
+light_color = Color(1, 0.35, 0, 1)
+light_energy = 4.5
+omni_range = 9.0
+
+[node name="Node3D" parent="." unique_id=2004936880 instance=ExtResource("2_wijl4")]
