@@ -1,7 +1,6 @@
 [gd_scene format=3 uid="uid://2i40l6ds35ry"]
 
 [ext_resource type="Script" uid="uid://ct2ajces2yke3" path="res://Scripts/CityGenerator.gd" id="1_c7s6e"]
-[ext_resource type="PackedScene" uid="uid://ckudr8chj1kgo" path="res://player.tscn" id="2_wijl4"]
 
 [sub_resource type="Environment" id="Environment_main"]
 background_mode = 2
@@ -478,6 +477,7 @@ material = SubResource("Mat_dirt")
 
 [node name="Skyscraper_Alpha" type="CSGBox3D" parent="Downtown" unique_id=974050656]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30, 80, -60)
+visible = false
 use_collision = true
 size = Vector3(28, 160, 28)
 material = SubResource("Mat_glass_office")
@@ -1592,5 +1592,3 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 112, 2, -65)
 light_color = Color(1, 0.35, 0, 1)
 light_energy = 4.5
 omni_range = 9.0
-
-[node name="Node3D" parent="." unique_id=2004936880 instance=ExtResource("2_wijl4")]
