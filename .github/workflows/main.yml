@@ -11,17 +11,15 @@ jobs:
     runs-on: macos-latest
     
     env:
-      GODOT_VERSION: 4.2.1
+      GODOT_VERSION: 4.7
       GODOT_RELEASE: stable
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Unzip Project Files
-        run: unzip -o game_project.zip -d project_folder
+      # Unzip step সরিয়ে ফেলা হয়েছে
 
-      # ক্যাশ সেটআপ যাতে প্রতিবার ডাউনলোড করতে না হয়
       - name: Cache Godot Templates
         uses: actions/cache@v4
         with:
@@ -31,13 +29,11 @@ jobs:
       - name: Download and Setup Godot
         run: |
           set -e
-          # Godot ইঞ্জিন ডাউনলোড
           curl -L -o Godot.zip https://github.com/godotengine/godot/releases/download/${{ env.GODOT_VERSION }}-${{ env.GODOT_RELEASE }}/Godot_v${{ env.GODOT_VERSION }}-${{ env.GODOT_RELEASE }}_macos.universal.zip
           unzip -q Godot.zip
           mv Godot.app /Applications/Godot.app
           echo "/Applications/Godot.app/Contents/MacOS" >> $GITHUB_PATH
           
-          # টেমপ্লেট ডাউনলোড (যদি ক্যাশ না থাকে)
           if [ ! -d "$HOME/Library/Application Support/Godot/export_templates/${{ env.GODOT_VERSION }}.${{ env.GODOT_RELEASE }}" ]; then
             curl -L -o templates.tpz https://github.com/godotengine/godot/releases/download/${{ env.GODOT_VERSION }}-${{ env.GODOT_RELEASE }}/Godot_v${{ env.GODOT_VERSION }}-${{ env.GODOT_RELEASE }}_export_templates.tpz
             unzip -q templates.tpz
@@ -45,14 +41,12 @@ jobs:
             mkdir -p "$TEMPLATE_DIR"
             mv templates/ios.zip "$TEMPLATE_DIR/ios.zip"
           fi
-
       - name: Godot Export to iOS
         run: |
           set -e
           mkdir -p build/ios
-          
-          # প্রজেক্ট ওপেন করে iOS এক্সপোর্ট করা
           Godot --headless --path "$GITHUB_WORKSPACE/project_folder/" --export-release "iOS" "$GITHUB_WORKSPACE/build/ios/igame.xcodeproj"
+      # ... বাকি স্টেপগুলো অপরিবর্তিত থাকবে
 
       - name: Build Xcode Project
         run: |
@@ -72,7 +66,6 @@ jobs:
             PROVISIONING_PROFILE_SPECIFIER="" \
             CONFIGURATION_BUILD_DIR="./output" \
             clean build
-
       - name: Package IPA
         run: |
           set -e
@@ -81,7 +74,6 @@ jobs:
           mv *.app Payload/
           zip -r igame_unsigned.ipa Payload
           rm -rf Payload
-
       - name: Upload Unsigned IPA
         uses: actions/upload-artifact@v4
         with:
