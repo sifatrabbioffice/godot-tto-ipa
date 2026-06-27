@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://2i40l6ds35ry"]
 
-[ext_resource type="Script" uid="uid://ct2ajces2yke3" path="res://Scripts/CityGenerator.gd" id="1_c7s6e"]
+[ext_resource type="Script" uid="uid://ct2ajces2yke3" path="res://scripts/CityGenerator.gd" id="1_c7s6e"]
 
 [sub_resource type="Environment" id="Environment_main"]
 background_mode = 2
@@ -398,7 +398,6 @@ roughness = 0.6
 [node name="CrimsonCity" type="Node3D" unique_id=1437157980]
 transform = Transform3D(-0.9966073, 0, 0.082303695, 0, 1, 0, -0.082303695, 0, -0.9966073, 0, 190.52835, 0)
 script = ExtResource("1_c7s6e")
-metadata/_edit_group_ = true
 
 [node name="GlobalEnvironment" type="WorldEnvironment" parent="." unique_id=533554637]
 environment = SubResource("Environment_main")
@@ -477,7 +476,6 @@ material = SubResource("Mat_dirt")
 
 [node name="Skyscraper_Alpha" type="CSGBox3D" parent="Downtown" unique_id=974050656]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30, 80, -60)
-visible = false
 use_collision = true
 size = Vector3(28, 160, 28)
 material = SubResource("Mat_glass_office")

@@ -22,25 +22,25 @@ func _process(delta: float) -> void:
 ambient_light_source = 3
 ambient_light_color = Color(1, 1, 1, 1)
 
-[node name="Node3D" type="Node3D" unique_id=398320586]
+[node name="game" type="Node3D" unique_id=398320586]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -157.6254, 0)
 script = SubResource("GDScript_a202f")
 
-[node name="Node3D" parent="." unique_id=748712438 instance=ExtResource("2_noarx")]
+[node name="character" parent="." unique_id=748712438 instance=ExtResource("2_noarx")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -113.445526, 439.89755, -119.56876)
 wall_min_slide_angle = 0.0
 
-[node name="Cotroller" parent="Node3D" unique_id=1186842702 instance=ExtResource("2_aqk2v")]
+[node name="Cotroller" parent="character" unique_id=1186842702 instance=ExtResource("2_aqk2v")]
 max_range = 160.0
 deadzone = 0.15
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=21891761]
+[node name="environment" type="WorldEnvironment" parent="." unique_id=21891761]
 environment = SubResource("Environment_a202f")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=717477260]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.745, 27.705, 0)
 light_energy = 6.634
 
-[node name="Map" parent="." unique_id=1163176453 instance=ExtResource("3_tlwt5")]
+[node name="map" parent="." unique_id=1163176453 instance=ExtResource("3_tlwt5")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -79.022995, 257.47003, -69.69792)
 metadata/_edit_lock_ = true

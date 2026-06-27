@@ -41,7 +41,7 @@ _subresources={
 "animations": {
 "mixamo_com": {
 "save_to_file/enabled": true,
-"save_to_file/fallback_path": "res://assets/animation/fight/fight.anim",
+"save_to_file/fallback_path": "res://assets/animation/attack/attack.anim",
 "save_to_file/keep_custom_tracks": "",
 "save_to_file/path": "uid://lw8kb0ucolkp",
 "settings/loop_mode": 1,
